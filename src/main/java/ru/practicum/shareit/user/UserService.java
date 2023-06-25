@@ -3,9 +3,10 @@ package ru.practicum.shareit.user;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface UserService {
-    User getUser(Integer userId);
+    Optional<User> getUser(Integer userId);
 
     Collection<User> getAllUsers();
 

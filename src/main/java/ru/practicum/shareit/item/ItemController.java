@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import org.mapstruct.factory.Mappers;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/items")
 public class ItemController {
     private final ItemService itemService;
+    private static final ItemMapper itemMapper = Mappers.getMapper(ItemMapper.class);
 
     public ItemController(ItemService itemService) {
         this.itemService = itemService;
@@ -27,14 +29,14 @@ public class ItemController {
 
     @GetMapping("/{id}")
     public ItemDto getItem(@PathVariable("id") Integer itemId) {
-        return ItemMapper.toDto(itemService.getItem(itemId));
+        return itemMapper.toDto(itemService.getItem(itemId).orElse(null));
     }
 
     @GetMapping
     public Collection<ItemDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Integer userId) {
         return itemService.getAllItems(userId)
                 .stream()
-                .map(ItemMapper::toDto)
+                .map(itemMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -42,17 +44,17 @@ public class ItemController {
     public Collection<ItemDto> getItem(@RequestParam("text") String text) {
         return itemService.searchItems(text)
                 .stream()
-                .map(ItemMapper::toDto)
+                .map(itemMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @PostMapping
     public ItemDto addItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Integer userId) {
-        return ItemMapper.toDto(itemService.addItem(ItemMapper.toItem(itemDto, userId)));
+        return itemMapper.toDto(itemService.addItem(itemMapper.enrichWithUserId(itemMapper.toItem(itemDto), userId)));
     }
 
     @PatchMapping("/{id}")
     public ItemDto editItem(@PathVariable("id") Integer itemId, @RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Integer userId) {
-        return ItemMapper.toDto(itemService.editItem(itemId, ItemMapper.toItem(itemDto, userId)));
+        return itemMapper.toDto(itemService.editItem(itemId, itemMapper.enrichWithUserId(itemMapper.toItem(itemDto), userId)));
     }
 }

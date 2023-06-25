@@ -3,9 +3,10 @@ package ru.practicum.shareit.item;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface ItemService {
-    Item getItem(Integer itemId);
+    Optional<Item> getItem(Integer itemId);
 
     Collection<Item> getAllItems(Integer userId);
 

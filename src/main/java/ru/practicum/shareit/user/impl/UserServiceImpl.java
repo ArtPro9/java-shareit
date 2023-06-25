@@ -6,6 +6,7 @@ import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.model.User;
 
+import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -19,47 +20,49 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUser(Integer userId) {
-        return userRepository.getUserById(userId).orElse(null);
+    public Optional<User> getUser(Integer userId) {
+        return userRepository.findById(userId);
     }
 
     @Override
     public Collection<User> getAllUsers() {
-        return userRepository.getAllUsers();
+        return userRepository.findAll();
     }
 
+    @Transactional
     @Override
     public User createUser(User user) {
-        List<String> emails = userRepository.getAllEmails();
+        List<String> emails = userRepository.findAllEmails();
         if (emails.contains(user.getEmail())) {
             throw new EmailDuplicationException("Email has already existed: " + user);
         }
-        return userRepository.createUser(user);
+        return userRepository.save(user);
     }
 
+    @Transactional
     @Override
     public User updateUser(Integer userId, User updatedUser) {
-        if (!checkIfUserExists(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("Unknown user id: " + userId);
         }
-        User user = getUser(userId);
-        if (!user.getEmail().equals(updatedUser.getEmail())) {
-            List<String> emails = userRepository.getAllEmails();
-            if (emails.contains(updatedUser.getEmail())) {
-                throw new EmailDuplicationException("Email has already existed: " + updatedUser);
+        User user = getUser(userId).orElseThrow(() -> new IllegalArgumentException("Unknown user id: " + userId));
+        if (updatedUser.getEmail() != null) {
+            if (!user.getEmail().equals(updatedUser.getEmail())) {
+                List<String> emails = userRepository.findAllEmails();
+                if (emails.contains(updatedUser.getEmail())) {
+                    throw new EmailDuplicationException("Email has already existed: " + updatedUser);
+                }
+                userRepository.updateUserEmail(userId, updatedUser.getEmail());
             }
         }
-        return userRepository.updateUser(userId, updatedUser);
-
+        if (updatedUser.getName() != null) {
+            userRepository.updateUserName(userId, updatedUser.getName());
+        }
+        return getUser(userId).orElseThrow(() -> new IllegalArgumentException("Unknown user id: " + userId));
     }
 
     @Override
     public void deleteUser(Integer userId) {
-        userRepository.deleteUserById(userId);
-    }
-
-    private boolean checkIfUserExists(int id) {
-        Optional<User> user = userRepository.getUserById(id);
-        return user.isPresent();
+        userRepository.deleteById(userId);
     }
 }

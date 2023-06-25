@@ -1,24 +1,21 @@
 package ru.practicum.shareit.item.dto;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import ru.practicum.shareit.item.model.Item;
 
-public class ItemMapper {
-    public static ItemDto toDto(Item item) {
-        return ItemDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getIsAvailable())
-                .build();
+@Mapper
+public abstract class ItemMapper {
+    public Item enrichWithUserId(Item item, Integer userId) {
+        if (userId != null) {
+            item.setOwnerId(userId);
+        }
+        return item;
     }
 
-    public static Item toItem(ItemDto itemDto, Integer id) {
-        return Item.builder()
-                .id(itemDto.getId())
-                .name(itemDto.getName())
-                .description(itemDto.getDescription())
-                .ownerId(id)
-                .isAvailable(itemDto.getAvailable())
-                .build();
-    }
+    @Mapping(source = "isAvailable", target = "available")
+    public abstract ItemDto toDto(Item item);
+
+    @Mapping(source = "available", target = "isAvailable")
+    public abstract Item toItem(ItemDto itemDto);
 }

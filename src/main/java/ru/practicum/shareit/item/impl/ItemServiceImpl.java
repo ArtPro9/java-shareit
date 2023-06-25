@@ -8,6 +8,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.model.User;
 
+import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
@@ -25,13 +26,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Item getItem(Integer itemId) {
-        return itemRepository.getItemById(itemId).orElse(null);
+    public Optional<Item> getItem(Integer itemId) {
+        return itemRepository.findById(itemId);
     }
 
     @Override
     public Collection<Item> getAllItems(Integer userId) {
-        return itemRepository.getAllItems()
+        return itemRepository.findAll()
                 .stream()
                 .filter(i -> Objects.equals(i.getOwnerId(), userId))
                 .collect(Collectors.toList());
@@ -42,36 +43,42 @@ public class ItemServiceImpl implements ItemService {
         if (text == null || text.isBlank()) {
             return Collections.emptyList();
         }
-        return itemRepository.getAllItems()
+        return itemRepository.findAll()
                 .stream()
                 .filter(Item::getIsAvailable)
                 .filter(i -> i.getDescription().toLowerCase().contains(text.toLowerCase()))
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public Item addItem(Item item) {
-        User user = userService.getUser(item.getOwnerId());
-        if (user == null) {
+        Optional<User> user = userService.getUser(item.getOwnerId());
+        if (user.isEmpty()) {
             throw new UnknownUserException("Unknown user id: " + item);
         }
-        return itemRepository.addItem(item);
+        return itemRepository.save(item);
     }
 
+    @Transactional
     @Override
     public Item editItem(Integer itemId, Item updatedItem) {
-        if (!checkIfItemExists(itemId)) {
+        if (!itemRepository.existsById(itemId)) {
             throw new IllegalArgumentException("Unknown item id: " + itemId);
         }
-        Item item = getItem(itemId);
+        Item item = getItem(itemId).orElseThrow(() -> new IllegalArgumentException("Unknown item id: " + itemId));
         if (!item.getOwnerId().equals(updatedItem.getOwnerId())) {
             throw new UnknownUserException("Illegal user id: " + updatedItem);
         }
-        return itemRepository.editItem(itemId, updatedItem);
-    }
-
-    private boolean checkIfItemExists(int id) {
-        Optional<Item> item = itemRepository.getItemById(id);
-        return item.isPresent();
+        if (updatedItem.getName() != null) {
+            itemRepository.editItemName(itemId, updatedItem.getName());
+        }
+        if (updatedItem.getDescription() != null) {
+            itemRepository.editItemDescription(itemId, updatedItem.getDescription());
+        }
+        if (updatedItem.getIsAvailable() != null) {
+            itemRepository.editItemAvailability(itemId, updatedItem.getIsAvailable());
+        }
+        return getItem(itemId).orElseThrow(() -> new IllegalArgumentException("Unknown item id: " + itemId));
     }
 }
