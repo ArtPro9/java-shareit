@@ -7,13 +7,9 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.user.model.User;
 
 import javax.transaction.Transactional;
-import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
-    @Query("select email from User")
-    List<String> findAllEmails();
-
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update User U set U.name = ?2 where U.id = ?1")

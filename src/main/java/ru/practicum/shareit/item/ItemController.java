@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.exception.UnknownItemException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
 
@@ -29,7 +30,7 @@ public class ItemController {
 
     @GetMapping("/{id}")
     public ItemDto getItem(@PathVariable("id") Integer itemId) {
-        return itemMapper.toDto(itemService.getItem(itemId).orElse(null));
+        return itemMapper.toDto(itemService.getItem(itemId).orElseThrow(() -> new UnknownItemException(itemId)));
     }
 
     @GetMapping

@@ -32,10 +32,6 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public User createUser(User user) {
-        List<String> emails = userRepository.findAllEmails();
-        if (emails.contains(user.getEmail())) {
-            throw new EmailDuplicationException("Email has already existed: " + user);
-        }
         return userRepository.save(user);
     }
 
@@ -45,15 +41,8 @@ public class UserServiceImpl implements UserService {
         if (!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("Unknown user id: " + userId);
         }
-        User user = getUser(userId).orElseThrow(() -> new IllegalArgumentException("Unknown user id: " + userId));
         if (updatedUser.getEmail() != null) {
-            if (!user.getEmail().equals(updatedUser.getEmail())) {
-                List<String> emails = userRepository.findAllEmails();
-                if (emails.contains(updatedUser.getEmail())) {
-                    throw new EmailDuplicationException("Email has already existed: " + updatedUser);
-                }
-                userRepository.updateUserEmail(userId, updatedUser.getEmail());
-            }
+            userRepository.updateUserEmail(userId, updatedUser.getEmail());
         }
         if (updatedUser.getName() != null) {
             userRepository.updateUserName(userId, updatedUser.getName());

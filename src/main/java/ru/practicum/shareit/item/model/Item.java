@@ -23,10 +23,8 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column
     private String name;
 
-    @Column
     private String description;
 
     @Column(name = "owner_id")

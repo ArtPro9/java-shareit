@@ -20,10 +20,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column
     private String name;
 
-    @Column
     @Email
     @NotBlank
     private String email;

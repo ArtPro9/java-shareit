@@ -32,6 +32,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<Item> getAllItems(Integer userId) {
+        checkIfUserExists(userId);
         return itemRepository.findAll()
                 .stream()
                 .filter(i -> Objects.equals(i.getOwnerId(), userId))
@@ -53,10 +54,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     @Override
     public Item addItem(Item item) {
-        Optional<User> user = userService.getUser(item.getOwnerId());
-        if (user.isEmpty()) {
-            throw new UnknownUserException("Unknown user id: " + item);
-        }
+        checkIfUserExists(item.getOwnerId());
         return itemRepository.save(item);
     }
 
@@ -68,7 +66,7 @@ public class ItemServiceImpl implements ItemService {
         }
         Item item = getItem(itemId).orElseThrow(() -> new IllegalArgumentException("Unknown item id: " + itemId));
         if (!item.getOwnerId().equals(updatedItem.getOwnerId())) {
-            throw new UnknownUserException("Illegal user id: " + updatedItem);
+            throw new UnknownUserException(updatedItem.getOwnerId());
         }
         if (updatedItem.getName() != null) {
             itemRepository.editItemName(itemId, updatedItem.getName());
@@ -80,5 +78,12 @@ public class ItemServiceImpl implements ItemService {
             itemRepository.editItemAvailability(itemId, updatedItem.getIsAvailable());
         }
         return getItem(itemId).orElseThrow(() -> new IllegalArgumentException("Unknown item id: " + itemId));
+    }
+
+    private void checkIfUserExists(Integer userId) {
+        Optional<User> user = userService.getUser(userId);
+        if (user.isEmpty()) {
+            throw new UnknownUserException(userId);
+        }
     }
 }
