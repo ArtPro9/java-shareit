@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Integer> {
@@ -24,4 +25,8 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     @Transactional
     @Query("update Item I set I.isAvailable = ?2 where I.id = ?1")
     void editItemAvailability(Integer itemId, boolean isAvailable);
+
+    List<Item> findAllByOwnerId(Integer userId);
+
+    List<Item> findAllByIsAvailableAndDescriptionContainingIgnoreCase(boolean isAvailable, String text);
 }

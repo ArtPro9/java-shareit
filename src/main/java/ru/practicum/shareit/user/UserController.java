@@ -25,7 +25,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public User getUser(@PathVariable("id") Integer userId) {
-        return userService.getUser(userId).orElseThrow(() -> new UnknownUserException(userId));
+        return userService.getUserOptional(userId).orElseThrow(() -> new UnknownUserException(userId));
     }
 
     @GetMapping

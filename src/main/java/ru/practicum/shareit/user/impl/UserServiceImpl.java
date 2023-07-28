@@ -1,14 +1,13 @@
 package ru.practicum.shareit.user.impl;
 
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.EmailDuplicationException;
+import ru.practicum.shareit.exception.UnknownUserException;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.model.User;
 
 import javax.transaction.Transactional;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,8 +19,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> getUser(Integer userId) {
+    public Optional<User> getUserOptional(Integer userId) {
         return userRepository.findById(userId);
+    }
+
+    @Override
+    public User getUser(Integer userId) {
+        Optional<User> user = getUserOptional(userId);
+        return user.orElseThrow(() -> new UnknownUserException(userId));
     }
 
     @Override
@@ -47,7 +52,7 @@ public class UserServiceImpl implements UserService {
         if (updatedUser.getName() != null) {
             userRepository.updateUserName(userId, updatedUser.getName());
         }
-        return getUser(userId).orElseThrow(() -> new IllegalArgumentException("Unknown user id: " + userId));
+        return getUserOptional(userId).orElseThrow(() -> new IllegalArgumentException("Unknown user id: " + userId));
     }
 
     @Override

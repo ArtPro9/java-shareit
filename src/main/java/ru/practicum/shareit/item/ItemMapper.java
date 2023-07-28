@@ -1,15 +1,15 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.item;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 @Mapper
 public abstract class ItemMapper {
-    public Item enrichWithUserId(Item item, Integer userId) {
-        if (userId != null) {
-            item.setOwnerId(userId);
-        }
+    public Item enrichWithUser(Item item, User user) {
+        item.setOwner(user);
         return item;
     }
 

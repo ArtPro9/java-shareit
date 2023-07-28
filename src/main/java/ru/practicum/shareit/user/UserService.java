@@ -6,7 +6,9 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface UserService {
-    Optional<User> getUser(Integer userId);
+    Optional<User> getUserOptional(Integer userId);
+
+    User getUser(Integer userId);
 
     Collection<User> getAllUsers();
 
