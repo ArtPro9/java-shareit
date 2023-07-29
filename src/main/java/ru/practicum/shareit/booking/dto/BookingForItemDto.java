@@ -1,13 +1,13 @@
 package ru.practicum.shareit.booking.dto;
 
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.model.Booking;
 
 import java.time.LocalDateTime;
 
 @Data
-@Builder
+@NoArgsConstructor
 public class BookingForItemDto {
     private int id;
     private int bookerId;
@@ -15,11 +15,11 @@ public class BookingForItemDto {
     private LocalDateTime end;
 
     public static BookingForItemDto consBookingForItemDto(Booking booking) {
-        return builder()
-                .id(booking.getId())
-                .bookerId(booking.getBooker().getId())
-                .start(booking.getStartTime())
-                .end(booking.getEndTime())
-                .build();
+        BookingForItemDto bookingForItemDto = new BookingForItemDto();
+        bookingForItemDto.setId(booking.getId());
+        bookingForItemDto.setBookerId(booking.getBooker().getId());
+        bookingForItemDto.setStart(booking.getStartTime());
+        bookingForItemDto.setEnd(booking.getEndTime());
+        return bookingForItemDto;
     }
 }

@@ -1,7 +1,7 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.item.model.Item;
 
@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
-@Builder
+@NoArgsConstructor
 public class ItemWithBookingDto {
     private int id;
     @NotBlank
@@ -24,15 +24,15 @@ public class ItemWithBookingDto {
     private List<CommentDto> comments;
 
     public static ItemWithBookingDto consBookingForItemDto(Item item, BookingForItemDto lastBooking, BookingForItemDto nextBooking, List<CommentDto> comments) {
-        return builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getIsAvailable())
-                .lastBooking(lastBooking)
-                .nextBooking(nextBooking)
-                .comments(comments)
-                .build();
+        ItemWithBookingDto itemWithBookingDto = new ItemWithBookingDto();
+        itemWithBookingDto.setId(item.getId());
+        itemWithBookingDto.setName(item.getName());
+        itemWithBookingDto.setDescription(item.getDescription());
+        itemWithBookingDto.setAvailable(item.getIsAvailable());
+        itemWithBookingDto.setLastBooking(lastBooking);
+        itemWithBookingDto.setNextBooking(nextBooking);
+        itemWithBookingDto.setComments(comments);
+        return itemWithBookingDto;
     }
 
 }
