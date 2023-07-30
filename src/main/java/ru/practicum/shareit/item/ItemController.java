@@ -14,7 +14,6 @@ import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithBookingDto;
 import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
 
 import javax.validation.Valid;
@@ -55,14 +54,12 @@ public class ItemController {
 
     @PostMapping
     public ItemDto addItem(@Valid @RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Integer userId) {
-        Item item = MAPPER.enrichWithUser(MAPPER.toItem(itemDto), userService.getUser(userId));
-        return MAPPER.toDto(itemService.addItem(item));
+        return MAPPER.toDto(itemService.addItem(MAPPER.toItem(itemDto, userService.getUser(userId))));
     }
 
     @PatchMapping("/{id}")
     public ItemDto editItem(@PathVariable("id") Integer itemId, @RequestBody ItemDto itemDto, @RequestHeader("X-Sharer-User-Id") Integer userId) {
-        Item item = MAPPER.enrichWithUser(MAPPER.toItem(itemDto), userService.getUser(userId));
-        return MAPPER.toDto(itemService.editItem(itemId, item));
+        return MAPPER.toDto(itemService.editItem(itemId, MAPPER.toItem(itemDto, userService.getUser(userId))));
     }
 
     @PostMapping("/{itemId}/comment")

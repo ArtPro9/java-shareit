@@ -3,12 +3,12 @@ package ru.practicum.shareit.item.impl;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
-import ru.practicum.shareit.booking.dto.BookingForItemDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.exception.UnknownItemException;
 import ru.practicum.shareit.exception.UnknownUserException;
 import ru.practicum.shareit.item.CommentRepository;
+import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.CommentDto;
@@ -38,27 +38,6 @@ public class ItemServiceImpl implements ItemService {
         this.commentRepository = commentRepository;
     }
 
-    private static ItemWithBookingDto consItemWithBooking(Item item, List<Booking> bookings, LocalDateTime now, List<Comment> comments) {
-        BookingForItemDto lastBooking = null;
-        BookingForItemDto nextBooking = null;
-        if (!bookings.isEmpty() && !bookings.get(0).getStartTime().isBefore(now)) {
-            nextBooking = BookingForItemDto.consBookingForItemDto(bookings.get(0));
-        }
-        for (int i = 0; i < bookings.size() - 1; i++) {
-            if (!bookings.get(i).getStartTime().isAfter(now) && !bookings.get(i + 1).getStartTime().isBefore(now)) {
-                lastBooking = BookingForItemDto.consBookingForItemDto(bookings.get(i));
-                nextBooking = BookingForItemDto.consBookingForItemDto(bookings.get(i + 1));
-            }
-        }
-        if (!bookings.isEmpty() && !bookings.get(bookings.size() - 1).getStartTime().isAfter(now)) {
-            lastBooking = BookingForItemDto.consBookingForItemDto(bookings.get(bookings.size() - 1));
-        }
-
-        List<CommentDto> commentDtos = comments.stream().map(CommentDto::consCommentDto).collect(Collectors.toList());
-
-        return ItemWithBookingDto.consBookingForItemDto(item, lastBooking, nextBooking, commentDtos);
-    }
-
     @Override
     public Optional<Item> getItemOptional(Integer itemId) {
         return itemRepository.findById(itemId);
@@ -75,7 +54,7 @@ public class ItemServiceImpl implements ItemService {
         LocalDateTime now = LocalDateTime.now();
         return itemRepository.findAllByOwnerId(userId)
                 .stream()
-                .map(i -> consItemWithBooking(
+                .map(i -> ItemMapper.consItemWithBooking(
                         i,
                         bookingRepository.findByItemId(i.getId(), SORT_BY_DATE),
                         now,
@@ -128,7 +107,7 @@ public class ItemServiceImpl implements ItemService {
             bookings = bookingRepository.findByItemIdAndBookingStatus(item.getId(), BookingStatus.APPROVED, SORT_BY_DATE);
         }
 
-        return consItemWithBooking(item, bookings, now, commentRepository.findAllByItemId(item.getId()));
+        return ItemMapper.consItemWithBooking(item, bookings, now, commentRepository.findAllByItemId(item.getId()));
     }
 
     @Override

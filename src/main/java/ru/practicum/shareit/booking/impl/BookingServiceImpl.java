@@ -10,6 +10,7 @@ import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.exception.UnknownBookingException;
 import ru.practicum.shareit.exception.UnknownUserException;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.model.User;
 
 import javax.transaction.Transactional;
@@ -22,9 +23,11 @@ import java.util.Optional;
 public class BookingServiceImpl implements BookingService {
     public static final Sort SORT_BY_DATE_DESC = Sort.by("startTime").descending();
     private final BookingRepository bookingRepository;
+    private final UserService userService;
 
-    public BookingServiceImpl(BookingRepository bookingRepository) {
+    public BookingServiceImpl(BookingRepository bookingRepository, UserService userService) {
         this.bookingRepository = bookingRepository;
+        this.userService = userService;
     }
 
     @Override
@@ -62,7 +65,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public Booking updateBookingStatusByOwner(User user, Integer bookingId, Boolean isApproved) {
+    public Booking updateBookingStatusByOwner(Integer userId, Integer bookingId, Optional<Boolean> isApprovedO) {
+        User user = userService.getUser(userId);
+        boolean isApproved = isApprovedO.orElseThrow(() -> new IllegalArgumentException("Parameter \"approved\" is empty"));
         Optional<Booking> bookingO = bookingRepository.findById(bookingId);
         if (bookingO.isEmpty()) {
             throw new IllegalArgumentException("Illegal booking id: " + bookingId);
@@ -78,7 +83,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking getBookingById(User user, Integer bookingId) {
+    public Booking getBookingById(Integer userId, Integer bookingId) {
+        User user = userService.getUser(userId);
         Optional<Booking> bookingO = bookingRepository.findById(bookingId);
         if (bookingO.isEmpty()) {
             throw new UnknownBookingException(bookingId);
@@ -92,7 +98,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingsWithState(User user, BookingState state) {
+    public List<Booking> getBookingsWithState(Integer userId, BookingState state) {
+        User user = userService.getUser(userId);
         LocalDateTime now = LocalDateTime.now();
         switch (state) {
             case PAST:
@@ -112,7 +119,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingsWithStateForOwner(User user, BookingState state) {
+    public List<Booking> getBookingsWithStateForOwner(Integer userId, BookingState state) {
+        User user = userService.getUser(userId);
         LocalDateTime now = LocalDateTime.now();
         switch (state) {
             case PAST:

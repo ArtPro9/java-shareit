@@ -2,19 +2,19 @@ package ru.practicum.shareit.booking;
 
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
-import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface BookingService {
 
     Booking createBooking(Booking booking);
 
-    Booking updateBookingStatusByOwner(User userId, Integer bookingId, Boolean isApproved);
+    Booking updateBookingStatusByOwner(Integer userId, Integer bookingId, Optional<Boolean> isApproved);
 
-    Booking getBookingById(User userId, Integer bookingId);
+    Booking getBookingById(Integer userId, Integer bookingId);
 
-    List<Booking> getBookingsWithState(User userId, BookingState state);
+    List<Booking> getBookingsWithState(Integer userId, BookingState state);
 
-    List<Booking> getBookingsWithStateForOwner(User userId, BookingState state);
+    List<Booking> getBookingsWithStateForOwner(Integer userId, BookingState state);
 }
