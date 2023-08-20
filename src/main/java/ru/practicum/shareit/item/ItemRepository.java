@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,7 +27,9 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
     @Query("update Item I set I.isAvailable = ?2 where I.id = ?1")
     void editItemAvailability(Integer itemId, boolean isAvailable);
 
-    List<Item> findAllByOwnerId(Integer userId);
+    List<Item> findAllByOwnerId(Integer userId, PageRequest pageRequest);
 
-    List<Item> findAllByIsAvailableAndDescriptionContainingIgnoreCase(boolean isAvailable, String text);
+    List<Item> findAllByIsAvailableAndDescriptionContainingIgnoreCase(boolean isAvailable, String text, PageRequest pageRequest);
+
+    List<Item> findAllByRequestId(int requestId);
 }

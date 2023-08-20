@@ -62,8 +62,14 @@ public class BookingController {
 
     @GetMapping
     public List<BookingOutputDto> getBookingsWithState(@RequestHeader("X-Sharer-User-Id") Integer userId,
-                                                       @RequestParam Optional<String> state) {
-        List<Booking> bookings = bookingService.getBookingsWithState(userId, BookingState.fromString(state));
+                                                       @RequestParam Optional<String> state,
+                                                       @RequestParam("from") Optional<Integer> from,
+                                                       @RequestParam("size") Optional<Integer> size) {
+        List<Booking> bookings = bookingService.getBookingsWithState(
+                userId,
+                BookingState.fromString(state),
+                from.orElse(0),
+                size.orElse(100));
         return bookings.stream()
                 .map(MAPPER::toDto)
                 .collect(Collectors.toList());
@@ -71,8 +77,14 @@ public class BookingController {
 
     @GetMapping("/owner")
     public List<BookingOutputDto> getBookingsWithStateForOwner(@RequestHeader("X-Sharer-User-Id") Integer userId,
-                                                               @RequestParam Optional<String> state) {
-        List<Booking> bookings = bookingService.getBookingsWithStateForOwner(userId, BookingState.fromString(state));
+                                                               @RequestParam Optional<String> state,
+                                                               @RequestParam("from") Optional<Integer> from,
+                                                               @RequestParam("size") Optional<Integer> size) {
+        List<Booking> bookings = bookingService.getBookingsWithStateForOwner(
+                userId,
+                BookingState.fromString(state),
+                from.orElse(0),
+                size.orElse(100));
         return bookings.stream()
                 .map(MAPPER::toDto)
                 .collect(Collectors.toList());

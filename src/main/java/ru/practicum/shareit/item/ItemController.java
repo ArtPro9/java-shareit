@@ -19,6 +19,7 @@ import ru.practicum.shareit.user.UserService;
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -40,13 +41,17 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemWithBookingDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Integer userId) {
-        return itemService.getAllItems(userId);
+    public Collection<ItemWithBookingDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Integer userId,
+                                                      @RequestParam("from") Optional<Integer> from,
+                                                      @RequestParam("size") Optional<Integer> size) {
+        return itemService.getAllItems(userId, from.orElse(0), size.orElse(100));
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> getItem(@RequestParam("text") String text) {
-        return itemService.searchItems(text)
+    public Collection<ItemDto> getItem(@RequestParam("text") String text,
+                                       @RequestParam("from") Optional<Integer> from,
+                                       @RequestParam("size") Optional<Integer> size) {
+        return itemService.searchItems(text, from.orElse(0), size.orElse(100))
                 .stream()
                 .map(MAPPER::toDto)
                 .collect(Collectors.toList());

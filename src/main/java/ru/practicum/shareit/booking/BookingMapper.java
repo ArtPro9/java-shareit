@@ -30,12 +30,6 @@ public abstract class BookingMapper {
     public abstract Booking toBooking(BookingInputDto bookingDto);
 
     public Booking toBooking(BookingInputDto bookingDto, Item item, User user) {
-        return enrichWithItemAndUser(toBooking(bookingDto), item, user);
-    }
-
-    private Booking enrichWithItemAndUser(Booking booking, Item item, User user) {
-        booking.setItem(item);
-        booking.setBooker(user);
-        return booking;
+        return toBooking(bookingDto).withItem(item).withBooker(user);
     }
 }

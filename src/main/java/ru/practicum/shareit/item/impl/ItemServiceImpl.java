@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.impl;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -50,9 +51,13 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemWithBookingDto> getAllItems(Integer userId) {
+    public Collection<ItemWithBookingDto> getAllItems(Integer userId, Integer from, Integer size) {
+        if (from < 0 || size <= 0) {
+            throw new IllegalArgumentException("Illegal pagination arguments: from=" + from + ", size=" + size);
+        }
+        int page = from / size;
         LocalDateTime now = LocalDateTime.now();
-        return itemRepository.findAllByOwnerId(userId)
+        return itemRepository.findAllByOwnerId(userId, PageRequest.of(page, size))
                 .stream()
                 .map(i -> ItemMapper.consItemWithBooking(
                         i,
@@ -63,11 +68,15 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<Item> searchItems(String text) {
+    public Collection<Item> searchItems(String text, Integer from, Integer size) {
+        if (from < 0 || size <= 0) {
+            throw new IllegalArgumentException("Illegal pagination arguments: from=" + from + ", size=" + size);
+        }
         if (text == null || text.isBlank()) {
             return Collections.emptyList();
         }
-        return itemRepository.findAllByIsAvailableAndDescriptionContainingIgnoreCase(true, text);
+        int page = from / size;
+        return itemRepository.findAllByIsAvailableAndDescriptionContainingIgnoreCase(true, text, PageRequest.of(page, size));
     }
 
     @Override

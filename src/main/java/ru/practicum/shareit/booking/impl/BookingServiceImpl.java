@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.impl;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -31,6 +32,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public Booking createBooking(Booking booking) {
         checkBookingDates(booking.getStartTime(), booking.getEndTime());
         checkIfItemAvailable(booking.getItem());
@@ -63,8 +65,8 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    @Transactional
     @Override
+    @Transactional
     public Booking updateBookingStatusByOwner(Integer userId, Integer bookingId, Optional<Boolean> isApprovedO) {
         User user = userService.getUser(userId);
         boolean isApproved = isApprovedO.orElseThrow(() -> new IllegalArgumentException("Parameter \"approved\" is empty"));
@@ -98,44 +100,52 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingsWithState(Integer userId, BookingState state) {
+    public List<Booking> getBookingsWithState(Integer userId, BookingState state, Integer from, Integer size) {
+        if (from < 0 || size <= 0) {
+            throw new IllegalArgumentException("Illegal pagination arguments: from=" + from + ", size=" + size);
+        }
+        int page = from / size;
         User user = userService.getUser(userId);
         LocalDateTime now = LocalDateTime.now();
         switch (state) {
             case PAST:
-                return bookingRepository.findPastBookingsAndSort(user.getId(), now, SORT_BY_DATE_DESC);
+                return bookingRepository.findPastBookingsAndSort(user.getId(), now, PageRequest.of(page, size, SORT_BY_DATE_DESC));
             case CURRENT:
-                return bookingRepository.findCurrentBookingsAndSort(user.getId(), now, SORT_BY_DATE_DESC);
+                return bookingRepository.findCurrentBookingsAndSort(user.getId(), now, PageRequest.of(page, size, SORT_BY_DATE_DESC));
             case FUTURE:
-                return bookingRepository.findFutureBookingsAndSort(user.getId(), now, SORT_BY_DATE_DESC);
+                return bookingRepository.findFutureBookingsAndSort(user.getId(), now, PageRequest.of(page, size, SORT_BY_DATE_DESC));
             case WAITING:
-                return bookingRepository.findByBookerIdAndBookingStatus(user.getId(), BookingStatus.WAITING, SORT_BY_DATE_DESC);
+                return bookingRepository.findByBookerIdAndBookingStatus(user.getId(), BookingStatus.WAITING, PageRequest.of(page, size, SORT_BY_DATE_DESC));
             case REJECTED:
-                return bookingRepository.findByBookerIdAndBookingStatus(user.getId(), BookingStatus.REJECTED, SORT_BY_DATE_DESC);
+                return bookingRepository.findByBookerIdAndBookingStatus(user.getId(), BookingStatus.REJECTED, PageRequest.of(page, size, SORT_BY_DATE_DESC));
             case ALL:
             default:
-                return bookingRepository.findAll(SORT_BY_DATE_DESC);
+                return bookingRepository.findAllByBookerId(user.getId(), PageRequest.of(page, size, SORT_BY_DATE_DESC));
         }
     }
 
     @Override
-    public List<Booking> getBookingsWithStateForOwner(Integer userId, BookingState state) {
+    public List<Booking> getBookingsWithStateForOwner(Integer userId, BookingState state, Integer from, Integer size) {
+        if (from < 0 || size <= 0) {
+            throw new IllegalArgumentException("Illegal pagination arguments: from=" + from + ", size=" + size);
+        }
+        int page = from / size;
         User user = userService.getUser(userId);
         LocalDateTime now = LocalDateTime.now();
         switch (state) {
             case PAST:
-                return bookingRepository.findOwnerPastBookingsAndSort(user.getId(), now, SORT_BY_DATE_DESC);
+                return bookingRepository.findOwnerPastBookingsAndSort(user.getId(), now, PageRequest.of(page, size, SORT_BY_DATE_DESC));
             case CURRENT:
-                return bookingRepository.findOwnerCurrentBookingsAndSort(user.getId(), now, SORT_BY_DATE_DESC);
+                return bookingRepository.findOwnerCurrentBookingsAndSort(user.getId(), now, PageRequest.of(page, size, SORT_BY_DATE_DESC));
             case FUTURE:
-                return bookingRepository.findOwnerFutureBookingsAndSort(user.getId(), now, SORT_BY_DATE_DESC);
+                return bookingRepository.findOwnerFutureBookingsAndSort(user.getId(), now, PageRequest.of(page, size, SORT_BY_DATE_DESC));
             case WAITING:
-                return bookingRepository.findByItemOwnerIdAndBookingStatus(user.getId(), BookingStatus.WAITING, SORT_BY_DATE_DESC);
+                return bookingRepository.findByItemOwnerIdAndBookingStatus(user.getId(), BookingStatus.WAITING, PageRequest.of(page, size, SORT_BY_DATE_DESC));
             case REJECTED:
-                return bookingRepository.findByItemOwnerIdAndBookingStatus(user.getId(), BookingStatus.REJECTED, SORT_BY_DATE_DESC);
+                return bookingRepository.findByItemOwnerIdAndBookingStatus(user.getId(), BookingStatus.REJECTED, PageRequest.of(page, size, SORT_BY_DATE_DESC));
             case ALL:
             default:
-                return bookingRepository.findAll(SORT_BY_DATE_DESC);
+                return bookingRepository.findAll(PageRequest.of(page, size, SORT_BY_DATE_DESC)).toList();
         }
     }
 

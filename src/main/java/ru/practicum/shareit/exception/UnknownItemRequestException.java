@@ -1,0 +1,11 @@
+package ru.practicum.shareit.exception;
+
+public class UnknownItemRequestException extends RuntimeException {
+    public UnknownItemRequestException(String message) {
+        super(message);
+    }
+
+    public UnknownItemRequestException(Integer id) {
+        super("Illegal item request id: " + id);
+    }
+}

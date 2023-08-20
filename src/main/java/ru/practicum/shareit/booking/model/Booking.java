@@ -16,9 +16,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-bookings.
- */
 @Data
 @Entity
 @Table(name = "bookings", schema = "public")
@@ -44,4 +41,14 @@ public class Booking {
     @Column(name = "status")
     @Enumerated
     private BookingStatus bookingStatus;
+
+    public Booking withBooker(User user) {
+        this.setBooker(user);
+        return this;
+    }
+
+    public Booking withItem(Item item) {
+        this.setItem(item);
+        return this;
+    }
 }
