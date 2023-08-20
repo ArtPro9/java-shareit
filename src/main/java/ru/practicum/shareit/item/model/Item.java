@@ -37,4 +37,12 @@ public class Item {
 
     @Column(name = "is_available")
     private Boolean isAvailable;
+
+    @Column(name = "request_id")
+    private Integer requestId;
+
+    public Item withOwner(User user) {
+        this.setOwner(user);
+        return this;
+    }
 }

@@ -13,9 +13,9 @@ public interface ItemService {
 
     Item getItem(Integer itemId);
 
-    Collection<ItemWithBookingDto> getAllItems(Integer userId);
+    Collection<ItemWithBookingDto> getAllItems(Integer userId, Integer from, Integer size);
 
-    Collection<Item> searchItems(String text);
+    Collection<Item> searchItems(String text, Integer from, Integer size);
 
     Item addItem(Item item);
 

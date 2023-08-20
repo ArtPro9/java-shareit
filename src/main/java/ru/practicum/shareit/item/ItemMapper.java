@@ -46,11 +46,6 @@ public abstract class ItemMapper {
     public abstract Item toItem(ItemDto itemDto);
 
     public Item toItem(ItemDto itemDto, User user) {
-        return enrichWithUser(toItem(itemDto), user);
-    }
-
-    private Item enrichWithUser(Item item, User user) {
-        item.setOwner(user);
-        return item;
+        return toItem(itemDto).withOwner(user);
     }
 }
